@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="xml_fragment_simple_background">#ffffff</color>
+    <color name="xml_fragment_schedule_background">#ffffff</color>
+
+    <color name="xml_main_black">#6D777B</color>
+    <color name="xml_main_blue">#35B1E1</color>
+</resources>
