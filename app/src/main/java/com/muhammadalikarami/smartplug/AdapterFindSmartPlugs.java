@@ -17,13 +17,13 @@ import java.util.ArrayList;
 /**
  * Created by moden pal on 8/30/2015.
  */
-public class AdapterSimple extends ArrayAdapter<Plug> {
+public class AdapterFindSmartPlugs extends ArrayAdapter<Plug> {
 
     private Context context;
-    private FragmentSimple fragment;
+    private FragmentDevices fragment;
     private ArrayList<Plug> plugs;
 
-    public AdapterSimple(Context context, FragmentSimple fragment, ArrayList<Plug> plugs) {
+    public AdapterFindSmartPlugs(Context context, FragmentDevices fragment, ArrayList<Plug> plugs) {
         super(context, R.layout.row_fragment_simple, plugs);
 
         this.context = context;
@@ -96,7 +96,7 @@ public class AdapterSimple extends ArrayAdapter<Plug> {
                     curItem.setIsOn(true);
                     notifyDataSetChanged();
 
-                    fragment.simpleRequest(curItem.getPlugNum(), AlarmType.ON );
+                    fragment.simpleRequest(curItem.getPlugNum(), AlarmType.ON   );
                 }
             }
         });

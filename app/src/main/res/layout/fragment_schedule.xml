@@ -9,7 +9,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/xml_main_blue"
+        android:background="@color/xml_main_green"
         android:minHeight="60dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"

@@ -8,5 +8,7 @@
     <color name="xml_fragment_schedule_background">#ffffff</color>
 
     <color name="xml_main_black">#6D777B</color>
-    <color name="xml_main_blue">#35B1E1</color>
+    <color name="xml_main_green">#23B000</color>
+
+    <color name="xml_footer_background">#eeeeee</color>
 </resources>
