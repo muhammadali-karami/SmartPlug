@@ -46,7 +46,6 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private View rootView;
     private RelativeLayout rlFooter;
     private LinearLayout llAddSchedule;
-    private ImageView imgAddSchedule;
     private CustomTextView txtAddSchedule;
     private ListView lvPlugs;
     private ListView lvAlarms;
@@ -81,7 +80,6 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         lvAlarms = (ListView) rootView.findViewById(R.id.lvAlarms);
         rlFooter = (RelativeLayout) rootView.findViewById(R.id.rlFooter);
         llAddSchedule = (LinearLayout) rootView.findViewById(R.id.llAddSchedule);
-        imgAddSchedule = (ImageView) rootView.findViewById(R.id.imgAddSchedule);
         txtAddSchedule = (CustomTextView) rootView.findViewById(R.id.txtAddSchedule);
         // add page
         rlAdd = (RelativeLayout) rootView.findViewById(R.id.rlAdd);

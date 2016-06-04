@@ -44,54 +44,37 @@
         android:id="@+id/greenLine"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_above="@+id/rlFooter"
+        android:layout_above="@+id/llAddSchedule"
         android:background="@color/xml_main_green" />
 
-    <RelativeLayout
-        android:id="@+id/rlFooter"
+    <LinearLayout
+        android:id="@+id/llAddSchedule"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/xml_footer_background">
+        android:background="@color/xml_footer_background"
+        android:gravity="center"
+        android:minHeight="60dp"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/llAddSchedule"
-            android:layout_width="match_parent"
+        <com.muhammadalikarami.smartplug.utility.CustomTextView
+            android:id="@+id/txtAddSchedule"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:gravity="center"
-            android:minHeight="60dp"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/imgAddSchedule"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerInParent="true"
-                android:layout_centerVertical="true"
-                android:padding="5dp"
-                android:src="@drawable/img_add" />
-
-            <com.muhammadalikarami.smartplug.utility.CustomTextView
-                android:id="@+id/txtAddSchedule"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:text="@string/xml_add_schedule"
-                android:textColor="@color/xml_main_green"
-                android:textSize="12sp" />
-        </LinearLayout>
-    </RelativeLayout>
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="@string/xml_add_schedule"
+            android:textColor="@color/xml_main_green"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <include
-        layout="@layout/add_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        layout="@layout/add_layout" />
 
 </RelativeLayout>
