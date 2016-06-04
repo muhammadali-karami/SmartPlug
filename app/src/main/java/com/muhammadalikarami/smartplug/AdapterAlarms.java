@@ -70,22 +70,22 @@ public class AdapterAlarms extends ArrayAdapter<Alarm> {
         // set objects
         holder.txtTime.setText(curItem.getExecuteTime() + "");// TODO in bayad formatter begire
         holder.txtPlug.setText(curItem.getPlugName());
-        if (curItem.isOn()) {
-            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
-            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
-            holder.txtPower.setText(Utility.getContext().getString(R.string.xml_on));
-            holder.imgTime.setImageResource(R.drawable.img_time_on);
-            holder.imgPlug.setImageResource(R.drawable.img_plug_on);
-            holder.imgPower.setImageResource(R.drawable.img_power_on);
-        }
-        else {
-            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_black));
-            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_black));
-
-            holder.imgTime.setImageResource(R.drawable.img_time_off);
-            holder.imgPlug.setImageResource(R.drawable.img_plug_off);
-            holder.imgPower.setImageResource(R.drawable.img_power_off);
-        }
+//        if (curItem.isOn()) {
+//            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
+//            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
+//            holder.txtPower.setText(Utility.getContext().getString(R.string.xml_on));
+//            holder.imgTime.setImageResource(R.drawable.img_time_on);
+//            holder.imgPlug.setImageResource(R.drawable.img_plug_on);
+//            holder.imgPower.setImageResource(R.drawable.img_power_on);
+//        }
+//        else {
+//            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_black));
+//            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_black));
+//
+//            holder.imgTime.setImageResource(R.drawable.img_time_off);
+//            holder.imgPlug.setImageResource(R.drawable.img_plug_off);
+//            holder.imgPower.setImageResource(R.drawable.img_power_off);
+//        }
 
         // set listeners
         holder.rlRow.setOnLongClickListener(new View.OnLongClickListener() {

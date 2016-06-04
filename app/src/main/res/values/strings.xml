@@ -7,4 +7,6 @@
 
     <string name="xml_on">ON</string>
     <string name="xml_off">OFF</string>
+
+    <string name="xml_please_select_correct_time">Please select correct time in future! :)</string>
 </resources>

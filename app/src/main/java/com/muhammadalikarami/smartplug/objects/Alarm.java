@@ -7,11 +7,12 @@ public class Alarm {
 
     private int alarmId;
     private String alarmName;
-    private long whenSetTime;
-    private long executeTime;
+    private String whenSetTime;
+    private String executeTime;
+    private int intervalTime;
     private int plugNum;
     private String plugName;
-    private boolean isOn;
+    private String plugStatus;
 
     public int getAlarmId() {
         return alarmId;
@@ -29,20 +30,28 @@ public class Alarm {
         this.alarmName = alarmName;
     }
 
-    public long getWhenSetTime() {
+    public String getWhenSetTime() {
         return whenSetTime;
     }
 
-    public void setWhenSetTime(long whenSetTime) {
+    public void setWhenSetTime(String whenSetTime) {
         this.whenSetTime = whenSetTime;
     }
 
-    public long getExecuteTime() {
+    public String getExecuteTime() {
         return executeTime;
     }
 
-    public void setExecuteTime(long executeTime) {
+    public void setExecuteTime(String executeTime) {
         this.executeTime = executeTime;
+    }
+
+    public int getIntervalTime() {
+        return intervalTime;
+    }
+
+    public void setIntervalTime(int intervalTime) {
+        this.intervalTime = intervalTime;
     }
 
     public int getPlugNum() {
@@ -61,11 +70,11 @@ public class Alarm {
         this.plugName = plugName;
     }
 
-    public boolean isOn() {
-        return isOn;
+    public String getPlugStatus() {
+        return plugStatus;
     }
 
-    public void setIsOn(boolean isOn) {
-        this.isOn = isOn;
+    public void setPlugStatus(String plugStatus) {
+        this.plugStatus = plugStatus;
     }
 }

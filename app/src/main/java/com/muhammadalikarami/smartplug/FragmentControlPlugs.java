@@ -2,11 +2,15 @@ package com.muhammadalikarami.smartplug;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -14,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -37,6 +42,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by Admin on 4/30/2016.
@@ -62,6 +69,8 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private Switch switchPower;
     private LinearLayout llAdd;
     private CustomTextView txtAdd;
+
+    private Alarm newAlarm;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -93,6 +102,16 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         llAddSchedule.setOnClickListener(this);
         llAdd.setOnClickListener(this);
 
+        switchPower.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b)
+                    switchPower.setText(getString(R.string.xml_on));
+                else
+                    switchPower.setText(getString(R.string.xml_off));
+            }
+        });
+
         syncRequest();
 
 //        sampleAlarms();
@@ -109,9 +128,33 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             rlAdd.setVisibility(View.VISIBLE);
         }
         else if (v == llAdd) {
-            Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
-            rlAdd.startAnimation(upBottom);
-            rlAdd.setVisibility(View.GONE);
+            Calendar c = Calendar.getInstance();
+            if (timePicker.getCurrentHour() < c.get(Calendar.HOUR) || timePicker.getCurrentMinute() < c.get(Calendar.MINUTE) + 1) {
+                timePicker.setCurrentHour(c.get(Calendar.HOUR));
+                timePicker.setCurrentMinute(c.get(Calendar.MINUTE) + 1);
+
+                Toast.makeText(Utility.getContext(), getString(R.string.xml_please_select_correct_time), Toast.LENGTH_LONG).show();
+            }
+            else {
+                newAlarm = new Alarm();
+                int intervalTime = calculateIntervalTime(c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                Log.i("INTERVAL", "" + intervalTime);
+                newAlarm.setAlarmId(0);
+                newAlarm.setAlarmName("");
+                newAlarm.setWhenSetTime(c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE));
+                newAlarm.setExecuteTime(timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute());
+                newAlarm.setIntervalTime(intervalTime);
+                newAlarm.setPlugNum(plugs.get(spinnerPlug.getSelectedItemPosition()).getPlugNum());
+                newAlarm.setPlugName(plugs.get(spinnerPlug.getSelectedItemPosition()).getPlugName());
+                if (switchPower.isChecked())
+                    newAlarm.setPlugStatus(AlarmStatus.ON);
+                else
+                    newAlarm.setPlugStatus(AlarmStatus.OFF);
+// TODO bayad bere bare zakhireye etelaat
+                Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
+                rlAdd.startAnimation(upBottom);
+                rlAdd.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -202,6 +245,13 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
                     plugAdapter = new AdapterPlugs(Utility.getContext(), FragmentControlPlugs.this, plugs);
                     lvPlugs.setAdapter(plugAdapter);
+
+                    List<String> list = new ArrayList<String>();
+                    for (int i = 0; i < plugs.size(); i++)
+                        list.add(plugs.get(i).getPlugName());
+                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list);
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerPlug.setAdapter(dataAdapter);
                 }
             }
         }, new Response.ErrorListener() {
@@ -215,6 +265,25 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         syncReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
         queue.add(syncReq);
 
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    private int calculateIntervalTime(int calendarHours, int calendarMins, int calendarSeconds, int pickerHours, int pickerMins) {
+        int interval = 0;
+        Calendar c1 = Calendar.getInstance();
+        Calendar c2 = Calendar.getInstance();
+
+        c1.set(Calendar.HOUR, calendarHours);
+        c1.set(Calendar.MINUTE, calendarMins);
+        c1.set(Calendar.SECOND, calendarSeconds);
+
+        c2.set(Calendar.HOUR, pickerHours);
+        c2.set(Calendar.MINUTE, pickerMins);
+        c2.set(Calendar.SECOND, 0);
+
+        interval = (int) ((c2.getTimeInMillis() - c1.getTimeInMillis())/1000);
+
+        return interval;
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
