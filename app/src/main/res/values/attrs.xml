@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleImageView">
+        <attr name="civ_border_width" format="dimension" />
+        <attr name="civ_border_color" format="color" />
+        <attr name="civ_border_overlay" format="boolean" />
+        <attr name="civ_fill_color" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="CustomTextView">
+        <attr name="fonts" />
+    </declare-styleable>
+
+    <attr name="fonts">
+        <enum name="opensans" value="1" />
+        <enum name="robobold" value="2" />
+        <enum name="robolight" value="3" />
+        <enum name="robomedium" value="4" />
+        <enum name="roboregular" value="5" />
+    </attr>
+</resources>

@@ -7,7 +7,7 @@ public class Plug {
 
     private int plugNum;
     private String plugName;
-    private boolean isOn;
+    private String plugStatus;
 
     public int getPlugNum() {
         return plugNum;
@@ -25,11 +25,11 @@ public class Plug {
         this.plugName = plugName;
     }
 
-    public boolean isOn() {
-        return isOn;
+    public String getPlugStatus() {
+        return plugStatus;
     }
 
-    public void setIsOn(boolean isOn) {
-        this.isOn = isOn;
+    public void setPlugStatus(String plugStatus) {
+        this.plugStatus = plugStatus;
     }
 }

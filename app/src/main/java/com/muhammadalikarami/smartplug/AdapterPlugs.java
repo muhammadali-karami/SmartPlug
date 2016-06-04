@@ -7,24 +7,24 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import com.muhammadalikarami.smartplug.models.AlarmType;
+import com.muhammadalikarami.smartplug.models.AlarmStatus;
 import com.muhammadalikarami.smartplug.objects.Plug;
+import com.muhammadalikarami.smartplug.utility.CustomTextView;
 
 import java.util.ArrayList;
 
 /**
  * Created by moden pal on 8/30/2015.
  */
-public class AdapterSimple extends ArrayAdapter<Plug> {
+public class AdapterPlugs extends ArrayAdapter<Plug> {
 
     private Context context;
-    private FragmentSimple fragment;
+    private FragmentControlPlugs fragment;
     private ArrayList<Plug> plugs;
 
-    public AdapterSimple(Context context, FragmentSimple fragment, ArrayList<Plug> plugs) {
-        super(context, R.layout.row_fragment_simple, plugs);
+    public AdapterPlugs(Context context, FragmentControlPlugs fragment, ArrayList<Plug> plugs) {
+        super(context, R.layout.row_plug, plugs);
 
         this.context = context;
         this.fragment = fragment;
@@ -36,7 +36,7 @@ public class AdapterSimple extends ArrayAdapter<Plug> {
         RelativeLayout rlRow ;
         ImageView imgPlug ;
         ImageView imgPower ;
-        TextView txtName ;
+        CustomTextView txtName ;
     }
 
     @Override
@@ -49,12 +49,12 @@ public class AdapterSimple extends ArrayAdapter<Plug> {
 
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.row_fragment_simple, parent, false);
+            convertView = inflater.inflate(R.layout.row_plug, parent, false);
 
             holder.rlRow = (RelativeLayout) convertView.findViewById(R.id.rlRow);
             holder.imgPlug = (ImageView) convertView.findViewById(R.id.imgPlug);
             holder.imgPower = (ImageView) convertView.findViewById(R.id.imgPower);
-            holder.txtName = (TextView) convertView.findViewById(R.id.txtName);
+            holder.txtName = (CustomTextView) convertView.findViewById(R.id.txtName);
 
             convertView.setTag(holder);
         }else
@@ -65,8 +65,8 @@ public class AdapterSimple extends ArrayAdapter<Plug> {
 
         // set objects
         holder.txtName.setText(curItem.getPlugName());
-        if (curItem.isOn()) {
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_green));
+        if (curItem.getPlugStatus().equals(AlarmStatus.ON)) {
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
             holder.imgPower.setImageResource(R.drawable.img_power_on);
             holder.imgPlug.setImageResource(R.drawable.img_plug_on);
         }
@@ -80,23 +80,11 @@ public class AdapterSimple extends ArrayAdapter<Plug> {
         holder.imgPower.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (curItem.isOn()) {
-                    holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_black));
-                    holder.imgPower.setImageResource(R.drawable.img_power_off);
-                    holder.imgPlug.setImageResource(R.drawable.img_plug_off);
-                    curItem.setIsOn(false);
-                    notifyDataSetChanged();
-
-                    fragment.simpleRequest(curItem.getPlugNum(), AlarmType.OFF);
+                if (curItem.getPlugStatus().equals(AlarmStatus.ON)) {
+                    fragment.powerRequest(position, curItem.getPlugNum(), AlarmStatus.OFF);
                 }
                 else {
-                    holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_green));
-                    holder.imgPower.setImageResource(R.drawable.img_power_on);
-                    holder.imgPlug.setImageResource(R.drawable.img_plug_on);
-                    curItem.setIsOn(true);
-                    notifyDataSetChanged();
-
-                    fragment.simpleRequest(curItem.getPlugNum(), AlarmType.ON );
+                    fragment.powerRequest(position, curItem.getPlugNum(), AlarmStatus.ON);
                 }
             }
         });

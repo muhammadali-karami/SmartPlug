@@ -23,8 +23,8 @@ public class ActivityMain extends AppCompatActivity {
         Fragment fragment = fm.findFragmentById(R.id.fragmentMain);
         if (fragment == null) {
             FragmentTransaction ft = fm.beginTransaction();
-            FragmentDevices fragmentDevices = new FragmentDevices();
-            ft.add(R.id.fragmentMain, fragmentDevices);
+            FragmentControlPlugs fragmentControlPlg = new FragmentControlPlugs();
+            ft.add(R.id.fragmentMain, fragmentControlPlg);
             ft.commit();
         }
         // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

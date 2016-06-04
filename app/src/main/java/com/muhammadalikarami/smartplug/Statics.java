@@ -14,8 +14,8 @@ public class Statics {
     public static final String fixUrl = "http://192.168.0.1/";
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // AP IP Address
-    public static final String simpleUrl      =   fixUrl + "simple/";
-    public static final String scheduleUrl    =   fixUrl + "schedule/";
-    public static final String cancelUrl      =   fixUrl + "cancel/";
-    public static final String syncUrl        =   fixUrl + "sync/";
+    public static final String simpleUrl      =   fixUrl + "simple";
+    public static final String scheduleUrl    =   fixUrl + "schedule";
+    public static final String cancelUrl      =   fixUrl + "cancel";
+    public static final String syncUrl        =   fixUrl + "sync";
 }

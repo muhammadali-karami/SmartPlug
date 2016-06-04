@@ -3,4 +3,8 @@
 
     <string name="xml_devices">Devices</string>
     <string name="xml_add_schedule">Add Schedule</string>
+    <string name="xml_add">Add</string>
+
+    <string name="xml_on">ON</string>
+    <string name="xml_off">OFF</string>
 </resources>

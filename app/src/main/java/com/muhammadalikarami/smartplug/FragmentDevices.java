@@ -17,6 +17,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.muhammadalikarami.smartplug.models.AlarmStatus;
 import com.muhammadalikarami.smartplug.objects.Plug;
 
 import org.json.JSONObject;
@@ -62,12 +63,12 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
         Plug plug1 = new Plug();
         plug1.setPlugNum(1);
         plug1.setPlugName("Plug 1");
-        plug1.setIsOn(true);
+        plug1.setPlugStatus(AlarmStatus.ON);
 
         Plug plug2 = new Plug();
         plug2.setPlugNum(2);
         plug2.setPlugName("Plug 2");
-        plug2.setIsOn(false);
+        plug1.setPlugStatus(AlarmStatus.OFF);
 
         plugs.add(plug1);
         plugs.add(plug2);
@@ -80,7 +81,7 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     @Override
     public void onClick(View v) {
-        if (v == rlDevices) {git
+        if (v == rlDevices) {
         }
         else if (v == rlAddSchedule) {
 
@@ -93,7 +94,7 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
 //            alarm.setWhenSetTime(987654321L);
 //            alarm.setExecuteTime(987654326L);
 //            alarm.setPlugNum(1);
-//            alarm.setAlarmType(AlarmType.ON);
+//            alarm.setAlarmType(AlarmStatus.ON);
 //
 ////            scheduleRequest(ScheduleType.ONCE_ON_AFTER, alarm);
 //        }
@@ -103,7 +104,7 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
 //            alarm.setWhenSetTime(987654321L);
 //            alarm.setExecuteTime(987654326L);
 //            alarm.setPlugNum(1);
-//            alarm.setAlarmType(AlarmType.OFF);
+//            alarm.setAlarmType(AlarmStatus.OFF);
 //
 ////            scheduleRequest(ScheduleType.ONCE_OFF_AFTER, alarm);
 //        }

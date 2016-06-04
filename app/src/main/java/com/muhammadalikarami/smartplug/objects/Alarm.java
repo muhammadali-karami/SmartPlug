@@ -5,11 +5,21 @@ package com.muhammadalikarami.smartplug.objects;
  */
 public class Alarm {
 
+    private int alarmId;
     private String alarmName;
     private long whenSetTime;
     private long executeTime;
-    private int plugNum ;
-    private String alarmType ;
+    private int plugNum;
+    private String plugName;
+    private boolean isOn;
+
+    public int getAlarmId() {
+        return alarmId;
+    }
+
+    public void setAlarmId(int alarmId) {
+        this.alarmId = alarmId;
+    }
 
     public String getAlarmName() {
         return alarmName;
@@ -43,11 +53,19 @@ public class Alarm {
         this.plugNum = plugNum;
     }
 
-    public String getAlarmType() {
-        return alarmType;
+    public String getPlugName() {
+        return plugName;
     }
 
-    public void setAlarmType(String alarmType) {
-        this.alarmType = alarmType;
+    public void setPlugName(String plugName) {
+        this.plugName = plugName;
+    }
+
+    public boolean isOn() {
+        return isOn;
+    }
+
+    public void setIsOn(boolean isOn) {
+        this.isOn = isOn;
     }
 }
