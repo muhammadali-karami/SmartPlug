@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/xml_fragment_simple_background"
+    android:background="@color/main_white"
     android:orientation="vertical">
 
     <View
@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_above="@+id/rlFooter"
-        android:background="@color/xml_main_green" />
+        android:background="@color/main_green" />
 
     <RelativeLayout
         android:id="@+id/rlFooter"
@@ -56,7 +56,7 @@
                     android:maxLines="1"
                     android:singleLine="true"
                     android:text="@string/xml_devices"
-                    android:textColor="@color/xml_main_green"
+                    android:textColor="@color/main_green"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -87,7 +87,7 @@
                     android:maxLines="1"
                     android:singleLine="true"
                     android:text="@string/xml_add_schedule"
-                    android:textColor="@color/xml_main_green"
+                    android:textColor="@color/main_green"
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>

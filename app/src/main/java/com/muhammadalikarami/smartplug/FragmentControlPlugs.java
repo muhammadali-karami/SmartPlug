@@ -1,6 +1,8 @@
 package com.muhammadalikarami.smartplug;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -37,12 +37,15 @@ import com.muhammadalikarami.smartplug.request.EmptyRequest;
 import com.muhammadalikarami.smartplug.response.GeneralResponse;
 import com.muhammadalikarami.smartplug.response.SyncResponse;
 import com.muhammadalikarami.smartplug.utility.CustomTextView;
+import com.muhammadalikarami.smartplug.utility.TimeUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -60,7 +63,9 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private AdapterAlarms alarmAdapter;
     private ArrayList<Plug> plugs;
     private ArrayList<Alarm> alarms;
-    private JsonObjectRequest smartPlugReq = null;
+    private JsonObjectRequest powerReq = null;
+    private JsonObjectRequest addAlarmReq = null;
+    private JsonObjectRequest cancelAlarmReq = null;
     private JsonObjectRequest syncReq = null;
 
     private RelativeLayout rlAdd;
@@ -72,15 +77,24 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
     private Alarm newAlarm;
 
+    private Runnable poolingRunnable;
+    private Handler poolingHandler = new Handler();
+    private int POOLING_DELAY = 5 * 1000;// 5 second
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_control_plugs, container, false);
 
-        init();
-
         return rootView;
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        init();
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -98,6 +112,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         llAdd = (LinearLayout) rootView.findViewById(R.id.llAdd);
         txtAdd = (CustomTextView) rootView.findViewById(R.id.txtAdd);
 
+        timePicker.setIs24HourView(true);
 
         llAddSchedule.setOnClickListener(this);
         llAdd.setOnClickListener(this);
@@ -113,10 +128,6 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         });
 
         syncRequest();
-
-//        sampleAlarms();
-//        alarmAdapter = new AdapterAlarms(Utility.getContext(),FragmentControlPlugs.this, alarms);
-//        lvAlarms.setAdapter(alarmAdapter);
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -128,40 +139,44 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             rlAdd.setVisibility(View.VISIBLE);
         }
         else if (v == llAdd) {
-            Calendar c = Calendar.getInstance();
-            if (timePicker.getCurrentHour() < c.get(Calendar.HOUR) || timePicker.getCurrentMinute() < c.get(Calendar.MINUTE) + 1) {
-                timePicker.setCurrentHour(c.get(Calendar.HOUR));
-                timePicker.setCurrentMinute(c.get(Calendar.MINUTE) + 1);
+            if (alarms.size() != 20) {
+                int intervalTime = TimeUtility.getDiffTimeForSetAlarm(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                TimeUtility.showRemainingTime();
+                Calendar cal = Calendar.getInstance();
 
-                Toast.makeText(Utility.getContext(), getString(R.string.xml_please_select_correct_time), Toast.LENGTH_LONG).show();
-            }
-            else {
+                // create alarm
                 newAlarm = new Alarm();
-                int intervalTime = calculateIntervalTime(c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), timePicker.getCurrentHour(), timePicker.getCurrentMinute());
-                Log.i("INTERVAL", "" + intervalTime);
                 newAlarm.setAlarmId(0);
-                newAlarm.setAlarmName("");
-                newAlarm.setWhenSetTime(c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE));
+                newAlarm.setAlarmName("Alarm-Name");
+                newAlarm.setWhenSetTime(cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
                 newAlarm.setExecuteTime(timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute());
-                newAlarm.setIntervalTime(intervalTime);
                 newAlarm.setPlugNum(plugs.get(spinnerPlug.getSelectedItemPosition()).getPlugNum());
-                newAlarm.setPlugName(plugs.get(spinnerPlug.getSelectedItemPosition()).getPlugName());
                 if (switchPower.isChecked())
-                    newAlarm.setPlugStatus(AlarmStatus.ON);
+                    newAlarm.setAlarmStatus(AlarmStatus.ON);
                 else
-                    newAlarm.setPlugStatus(AlarmStatus.OFF);
-// TODO bayad bere bare zakhireye etelaat
+                    newAlarm.setAlarmStatus(AlarmStatus.OFF);
+                // end
+
                 Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
                 rlAdd.startAnimation(upBottom);
                 rlAdd.setVisibility(View.GONE);
+
+                addAlarmRequest(intervalTime);
+            }
+            else {
+                Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
+                rlAdd.startAnimation(upBottom);
+                rlAdd.setVisibility(View.GONE);
+
+                Toast.makeText(Utility.getContext(), getString(R.string.error_max_alarm_added), Toast.LENGTH_LONG).show();
             }
         }
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public void powerRequest(final int position, final int plugNum, final String plugStatus) {
-        if (smartPlugReq != null)
-            smartPlugReq.cancel();
+        if (powerReq != null)
+            powerReq.cancel();
 
         final EmptyRequest emptyRequest = new EmptyRequest();
 
@@ -177,7 +192,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         String url = Statics.simpleUrl + "/" + plugNum + "/" + plugStatus;
 
-        smartPlugReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
+        powerReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 String jsonString = response.toString();
@@ -202,8 +217,100 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
             }
         });
-        smartPlugReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
-        queue.add(smartPlugReq);
+        powerReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
+        queue.add(powerReq);
+
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    public void addAlarmRequest(int intervalTime) {
+        if (addAlarmReq != null)
+            addAlarmReq.cancel();
+
+        final EmptyRequest emptyRequest = new EmptyRequest();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonString = gson.toJson(emptyRequest);
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(jsonString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        String url = Statics.scheduleUrl + "/" + newAlarm.getPlugNum() + "/" + newAlarm.getAlarmStatus() + "/" + newAlarm.getAlarmName() + "&" + newAlarm.getWhenSetTime()
+                    + "&" + newAlarm.getExecuteTime() + "&" + intervalTime;
+        Log.i("Status", url);
+        addAlarmReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                String jsonString = response.toString();
+                Gson gson = new Gson();
+                GeneralResponse generalResponse = gson.fromJson(jsonString, GeneralResponse.class);
+                if (generalResponse.isOk()) {
+                    Handler handler=new Handler();
+                    Runnable runnable = new Runnable() {
+                        public void run() {
+                            syncRequest();
+                        }
+                    };
+                    handler.postDelayed(runnable, 500);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error", "Error: " + error.networkResponse);
+                if (error.networkResponse != null)
+                    VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
+            }
+        });
+        addAlarmReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
+        queue.add(addAlarmReq);
+
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    public void cancelAlarmRequest(final int position) {
+        if (cancelAlarmReq != null)
+            cancelAlarmReq.cancel();
+
+        final EmptyRequest emptyRequest = new EmptyRequest();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonString = gson.toJson(emptyRequest);
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(jsonString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        String url = Statics.cancelUrl + "/" + alarms.get(position).getAlarmId();
+        Log.i("Status", url);
+        cancelAlarmReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                String jsonString = response.toString();
+                Gson gson = new Gson();
+                GeneralResponse generalResponse = gson.fromJson(jsonString, GeneralResponse.class);
+                if (generalResponse.isOk()) {
+                    alarmAdapter.remove(alarms.get(position));
+                    alarmAdapter.notifyDataSetChanged();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error", "Error: " + error.networkResponse);
+                if (error.networkResponse != null)
+                    VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
+            }
+        });
+        cancelAlarmReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
+        queue.add(cancelAlarmReq);
 
     }
 
@@ -230,28 +337,57 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             @Override
             public void onResponse(JSONObject response) {
                 String jsonString = response.toString();
+                Log.i("What", jsonString);
                 Gson gson = new Gson();
                 SyncResponse syncResponse = gson.fromJson(jsonString, SyncResponse.class);
                 if (syncResponse.isOk()) {
                     plugs = new ArrayList();
-                    for (int i = 0; i < syncResponse.getData().getPlugs().length; i++) {
-                        Plug plug = new Plug();
-                        plug.setPlugNum(syncResponse.getData().getPlugs()[i].getPlugNum());
-                        plug.setPlugName(syncResponse.getData().getPlugs()[i].getPlugName());
-                        plug.setPlugStatus(syncResponse.getData().getPlugs()[i].getPlugStatus());
+                    alarms = new ArrayList();
 
-                        plugs.add(plug);
+                    if (syncResponse.getData() != null) {
+                        for (int i = 0; i < syncResponse.getData().getPlugs().length; i++) {
+                            Plug plug = new Plug();
+                            plug.setPlugNum(syncResponse.getData().getPlugs()[i].getPlugNum());
+                            plug.setPlugName(syncResponse.getData().getPlugs()[i].getPlugName());
+                            plug.setPlugStatus(syncResponse.getData().getPlugs()[i].getPlugStatus());
+
+                            plugs.add(plug);
+                        }
+
+                        for (int i = 0; i < syncResponse.getData().getAlarms().length; i++) {
+                            Alarm alarm = new Alarm();
+                            alarm.setAlarmId(syncResponse.getData().getAlarms()[i].getAlarmId());
+                            alarm.setPlugNum(syncResponse.getData().getAlarms()[i].getPlugNum());
+                            alarm.setAlarmName(syncResponse.getData().getAlarms()[i].getAlarmName());
+                            alarm.setWhenSetTime(syncResponse.getData().getAlarms()[i].getWhenSetTime());
+                            alarm.setExecuteTime(syncResponse.getData().getAlarms()[i].getExecuteTime());
+                            alarm.setAlarmStatus(syncResponse.getData().getAlarms()[i].getAlarmStatus());
+
+                            alarms.add(alarm);
+                        }
+
+                        plugAdapter = new AdapterPlugs(Utility.getContext(), FragmentControlPlugs.this, plugs);
+                        lvPlugs.setAdapter(plugAdapter);
+
+
+                        Collections.sort(alarms, new Comparator() {
+                            @Override
+                            public int compare(Object o1, Object o2) {
+                                Alarm p1 = (Alarm) o1;
+                                Alarm p2 = (Alarm) o2;
+                                return p1.getExecuteTime().compareToIgnoreCase(p2.getExecuteTime());
+                            }
+                        });
+                        alarmAdapter = new AdapterAlarms(Utility.getContext(), FragmentControlPlugs.this, alarms);
+                        lvAlarms.setAdapter(alarmAdapter);
+
+                        List<String> list = new ArrayList<String>();
+                        for (int i = 0; i < plugs.size(); i++)
+                            list.add(plugs.get(i).getPlugName());
+                        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list);
+                        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinnerPlug.setAdapter(dataAdapter);
                     }
-
-                    plugAdapter = new AdapterPlugs(Utility.getContext(), FragmentControlPlugs.this, plugs);
-                    lvPlugs.setAdapter(plugAdapter);
-
-                    List<String> list = new ArrayList<String>();
-                    for (int i = 0; i < plugs.size(); i++)
-                        list.add(plugs.get(i).getPlugName());
-                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list);
-                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spinnerPlug.setAdapter(dataAdapter);
                 }
             }
         }, new Response.ErrorListener() {
@@ -268,31 +404,47 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    private int calculateIntervalTime(int calendarHours, int calendarMins, int calendarSeconds, int pickerHours, int pickerMins) {
-        int interval = 0;
-        Calendar c1 = Calendar.getInstance();
-        Calendar c2 = Calendar.getInstance();
+    public String getPlugName(int plugNum) {
+        for (int i = 0; i < plugs.size(); i++) {
+            if (plugs.get(i).getPlugNum() == plugNum)
+                return plugs.get(i).getPlugName();
+        }
+        return "";
+    }
 
-        c1.set(Calendar.HOUR, calendarHours);
-        c1.set(Calendar.MINUTE, calendarMins);
-        c1.set(Calendar.SECOND, calendarSeconds);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-        c2.set(Calendar.HOUR, pickerHours);
-        c2.set(Calendar.MINUTE, pickerMins);
-        c2.set(Calendar.SECOND, 0);
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncRequest();
 
-        interval = (int) ((c2.getTimeInMillis() - c1.getTimeInMillis())/1000);
-
-        return interval;
+        // pooling sync
+//        poolingRunnable = new Runnable() {
+//            public void run() {
+//                syncRequest();
+//                poolingHandler.postDelayed(poolingRunnable, POOLING_DELAY);
+//            }
+//        };
+//        poolingHandler.postDelayed(poolingRunnable, POOLING_DELAY);
+        // end
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     @Override
     public void onStop() {
         super.onStop();
-        if (smartPlugReq != null)
-            smartPlugReq.cancel();
+        if (powerReq != null)
+            powerReq.cancel();
+        if (addAlarmReq != null)
+            addAlarmReq.cancel();
+        if (cancelAlarmReq != null)
+            cancelAlarmReq.cancel();
         if (syncReq != null)
             syncReq.cancel();
+
+        // cancel pooling
+//        poolingHandler.removeCallbacks(poolingRunnable);
+        // end
     }
 }

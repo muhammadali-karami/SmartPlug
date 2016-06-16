@@ -66,12 +66,12 @@ public class AdapterPlugs extends ArrayAdapter<Plug> {
         // set objects
         holder.txtName.setText(curItem.getPlugName());
         if (curItem.getPlugStatus().equals(AlarmStatus.ON)) {
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.main_blue));
             holder.imgPower.setImageResource(R.drawable.img_power_on);
             holder.imgPlug.setImageResource(R.drawable.img_plug_on);
         }
         else {
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_black));
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.main_black));
             holder.imgPower.setImageResource(R.drawable.img_power_off);
             holder.imgPlug.setImageResource(R.drawable.img_plug_off);
         }

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/xml_fragment_simple_background"
+    android:background="@color/main_white"
     android:orientation="vertical">
 
     <ListView
@@ -24,7 +24,7 @@
         android:layout_below="@+id/lvPlugs"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@color/xml_main_black" />
+        android:background="@color/main_black" />
 
     <ListView
         android:id="@+id/lvAlarms"
@@ -33,7 +33,7 @@
         android:layout_above="@+id/greenLine"
         android:layout_below="@+id/blackLine"
         android:cacheColorHint="@android:color/transparent"
-        android:divider="@color/xml_main_black"
+        android:divider="@color/main_black"
         android:dividerHeight="0.25dp"
         android:footerDividersEnabled="false"
         android:headerDividersEnabled="false"
@@ -45,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_above="@+id/llAddSchedule"
-        android:background="@color/xml_main_green" />
+        android:background="@color/main_green" />
 
     <LinearLayout
         android:id="@+id/llAddSchedule"
@@ -68,7 +68,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:text="@string/xml_add_schedule"
-            android:textColor="@color/xml_main_green"
+            android:textColor="@color/main_green"
             android:textSize="14sp" />
     </LinearLayout>
 

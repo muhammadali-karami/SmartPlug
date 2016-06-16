@@ -9,4 +9,19 @@
     <string name="xml_off">OFF</string>
 
     <string name="xml_please_select_correct_time">Please select correct time in future! :)</string>
+
+    <string name="time_utility_less_than_one_minute">Less than 1 minute</string>
+    <string name="time_utility_about">About</string>
+    <string name="time_utility_hour">hour</string>
+    <string name="time_utility_hours">hours</string>
+    <string name="time_utility_minute">minute</string>
+    <string name="time_utility_minutes">minutes</string>
+    <string name="time_utility_and">and</string>
+    <string name="time_utility_remaining">from now.</string>
+
+    <string name="dialog_delete_content">Delete? Are you sure?</string>
+    <string name="dialog_delete_yes">YES</string>
+    <string name="dialog_delete_cancel">CANCEL</string>
+
+    <string name="error_max_alarm_added">You can\'t add more alarm.</string>
 </resources>

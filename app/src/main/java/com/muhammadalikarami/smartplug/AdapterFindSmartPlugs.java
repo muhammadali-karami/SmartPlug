@@ -66,12 +66,12 @@ public class AdapterFindSmartPlugs extends ArrayAdapter<Plug> {
         // set objects
         holder.txtName.setText(curItem.getPlugName());
         if (curItem.getPlugStatus() == AlarmStatus.ON) {
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_green));
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.main_green));
             holder.imgPower.setImageResource(R.drawable.img_power_on);
             holder.imgPlug.setImageResource(R.drawable.img_plug_on);
         }
         else {
-            holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_black));
+            holder.txtName.setTextColor(context.getResources().getColor(R.color.main_black));
             holder.imgPower.setImageResource(R.drawable.img_power_off);
             holder.imgPlug.setImageResource(R.drawable.img_plug_off);
         }
@@ -81,7 +81,7 @@ public class AdapterFindSmartPlugs extends ArrayAdapter<Plug> {
             @Override
             public void onClick(View view) {
                 if (curItem.getPlugStatus() == AlarmStatus.ON) {
-                    holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_black));
+                    holder.txtName.setTextColor(context.getResources().getColor(R.color.main_black));
                     holder.imgPower.setImageResource(R.drawable.img_power_off);
                     holder.imgPlug.setImageResource(R.drawable.img_plug_off);
                     curItem.setPlugStatus(AlarmStatus.OFF);
@@ -90,7 +90,7 @@ public class AdapterFindSmartPlugs extends ArrayAdapter<Plug> {
                     fragment.simpleRequest(curItem.getPlugNum(), AlarmStatus.OFF);
                 }
                 else {
-                    holder.txtName.setTextColor(context.getResources().getColor(R.color.xml_main_green));
+                    holder.txtName.setTextColor(context.getResources().getColor(R.color.main_green));
                     holder.imgPower.setImageResource(R.drawable.img_power_on);
                     holder.imgPlug.setImageResource(R.drawable.img_plug_on);
                     curItem.setPlugStatus(AlarmStatus.ON);

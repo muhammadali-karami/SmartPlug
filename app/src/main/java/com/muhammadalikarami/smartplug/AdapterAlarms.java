@@ -1,13 +1,17 @@
 package com.muhammadalikarami.smartplug;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.muhammadalikarami.smartplug.models.AlarmStatus;
 import com.muhammadalikarami.smartplug.objects.Alarm;
 import com.muhammadalikarami.smartplug.utility.CustomTextView;
 
@@ -68,33 +72,57 @@ public class AdapterAlarms extends ArrayAdapter<Alarm> {
         }
 
         // set objects
-        holder.txtTime.setText(curItem.getExecuteTime() + "");// TODO in bayad formatter begire
-        holder.txtPlug.setText(curItem.getPlugName());
-//        if (curItem.isOn()) {
-//            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
-//            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_blue));
-//            holder.txtPower.setText(Utility.getContext().getString(R.string.xml_on));
-//            holder.imgTime.setImageResource(R.drawable.img_time_on);
-//            holder.imgPlug.setImageResource(R.drawable.img_plug_on);
-//            holder.imgPower.setImageResource(R.drawable.img_power_on);
-//        }
-//        else {
-//            holder.txtTime.setTextColor(context.getResources().getColor(R.color.xml_main_black));
-//            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.xml_main_black));
-//
-//            holder.imgTime.setImageResource(R.drawable.img_time_off);
-//            holder.imgPlug.setImageResource(R.drawable.img_plug_off);
-//            holder.imgPower.setImageResource(R.drawable.img_power_off);
-//        }
+        holder.txtTime.setText(curItem.getExecuteTime() + "");
+        holder.txtPlug.setText(fragment.getPlugName(curItem.getPlugNum()));
+        if (curItem.getAlarmStatus().equals(AlarmStatus.ON)) {
+            holder.txtTime.setTextColor(context.getResources().getColor(R.color.main_blue));
+            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.main_blue));
+            holder.txtPower.setTextColor(context.getResources().getColor(R.color.main_blue));
+            holder.txtPower.setText(Utility.getContext().getString(R.string.xml_on));
+            holder.imgTime.setImageResource(R.drawable.img_time_on);
+            holder.imgPlug.setImageResource(R.drawable.img_plug_on);
+            holder.imgPower.setImageResource(R.drawable.img_power_on);
+        }
+        else {
+            holder.txtTime.setTextColor(context.getResources().getColor(R.color.main_black));
+            holder.txtPlug.setTextColor(context.getResources().getColor(R.color.main_black));
+            holder.txtPower.setTextColor(context.getResources().getColor(R.color.main_black));
+            holder.txtPower.setText(Utility.getContext().getString(R.string.xml_off));
+            holder.imgTime.setImageResource(R.drawable.img_time_off);
+            holder.imgPlug.setImageResource(R.drawable.img_plug_off);
+            holder.imgPower.setImageResource(R.drawable.img_power_off);
+        }
 
         // set listeners
         holder.rlRow.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                final Dialog dialog = new Dialog(fragment.getActivity());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.dialog_delete);
+                TextView txtContent = (TextView) dialog.findViewById(R.id.txtContent);
+                TextView txtYes = (TextView) dialog.findViewById(R.id.txtYes);
+                TextView txtCancel = (TextView) dialog.findViewById(R.id.txtCancel);
+                dialog.show();
+
+                txtYes.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        fragment.cancelAlarmRequest(position);
+                        dialog.dismiss();
+                    }
+                });
+
+                txtCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dialog.dismiss();
+                    }
+                });
+
                 return false;
             }
         });
-
 
         return convertView;
     }

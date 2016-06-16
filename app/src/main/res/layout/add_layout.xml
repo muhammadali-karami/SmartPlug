@@ -3,7 +3,7 @@
     android:id="@+id/rlAdd"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/xml_fragment_simple_background"
+    android:background="@color/main_white"
     android:orientation="vertical"
     android:visibility="gone">
 
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_above="@+id/llAdd"
-        android:background="@color/xml_main_green" />
+        android:background="@color/main_green" />
 
     <LinearLayout
         android:id="@+id/llAdd"
@@ -35,7 +35,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:text="@string/xml_add"
-            android:textColor="@color/xml_main_green"
+            android:textColor="@color/main_green"
             android:textSize="14sp" />
     </LinearLayout>
 

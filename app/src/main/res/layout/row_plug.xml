@@ -37,7 +37,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:text="Plug 1"
-            android:textColor="@color/xml_main_black"
+            android:textColor="@color/main_black"
             android:textSize="20sp" />
 
         <ImageView

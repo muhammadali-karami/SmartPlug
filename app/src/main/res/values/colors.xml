@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#23B000</color>
-    <color name="colorPrimaryDark">#23B000</color>
-    <color name="colorAccent">#23B000</color>
+    <color name="colorPrimary">@color/main_green</color>
+    <color name="colorPrimaryDark">@color/main_green</color>
+    <color name="colorAccent">@color/main_green</color>
 
-    <color name="xml_fragment_simple_background">#ffffff</color>
-    <color name="xml_fragment_schedule_background">#ffffff</color>
+    <color name="main_white">#ffffff</color>
 
-    <color name="xml_main_black">#6D777B</color>
-    <color name="xml_main_green">#23B000</color>
-    <color name="xml_main_blue">#34AEE1</color>
+    <color name="main_black">#6D777B</color>
+    <color name="main_green">#23B000</color>
+    <color name="main_blue">#34AEE1</color>
 
     <color name="xml_footer_background">#eeeeee</color>
 </resources>

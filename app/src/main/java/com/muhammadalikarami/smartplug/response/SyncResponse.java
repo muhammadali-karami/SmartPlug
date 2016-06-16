@@ -1,5 +1,8 @@
 package com.muhammadalikarami.smartplug.response;
 
+import com.muhammadalikarami.smartplug.objects.Alarm;
+import com.muhammadalikarami.smartplug.objects.Plug;
+
 /**
  * Created by Admin on 6/2/2016.
  */
@@ -32,45 +35,25 @@ public class SyncResponse {
         this.data = data;
     }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public class Data {
-        private Plugs[] plugs;
+        private Plug[] plugs;
+        private Alarm[] alarms;
 
-        public Plugs[] getPlugs() {
+        public Plug[] getPlugs() {
             return plugs;
         }
 
-        public void setPlugs(Plugs[] plugs) {
+        public void setPlugs(Plug[] plugs) {
             this.plugs = plugs;
         }
-    }
 
-    public class Plugs {
-        private int plugNum;
-        private String plugName;
-        private String plugStatus;
-
-        public int getPlugNum() {
-            return plugNum;
+        public Alarm[] getAlarms() {
+            return alarms;
         }
 
-        public void setPlugNum(int plugNum) {
-            this.plugNum = plugNum;
-        }
-
-        public String getPlugName() {
-            return plugName;
-        }
-
-        public void setPlugName(String plugName) {
-            this.plugName = plugName;
-        }
-
-        public String getPlugStatus() {
-            return plugStatus;
-        }
-
-        public void setPlugStatus(String plugStatus) {
-            this.plugStatus = plugStatus;
+        public void setAlarms(Alarm[] alarms) {
+            this.alarms = alarms;
         }
     }
 }
