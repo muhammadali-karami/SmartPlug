@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -28,6 +31,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.muhammadalikarami.smartplug.models.AlarmStatus;
@@ -36,7 +40,6 @@ import com.muhammadalikarami.smartplug.objects.Plug;
 import com.muhammadalikarami.smartplug.request.EmptyRequest;
 import com.muhammadalikarami.smartplug.response.GeneralResponse;
 import com.muhammadalikarami.smartplug.response.SyncResponse;
-import com.muhammadalikarami.smartplug.utility.CustomTextView;
 import com.muhammadalikarami.smartplug.utility.TimeUtility;
 
 import org.json.JSONException;
@@ -56,13 +59,16 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private View rootView;
     private RelativeLayout rlFooter;
     private LinearLayout llAddSchedule;
-    private CustomTextView txtAddSchedule;
+    private TextView txtAddSchedule;
     private ListView lvPlugs;
     private ListView lvAlarms;
+    private View blackLine;
+    private View greenLine;
     private AdapterPlugs plugAdapter;
     private AdapterAlarms alarmAdapter;
-    private ArrayList<Plug> plugs;
-    private ArrayList<Alarm> alarms;
+    private ArrayList<Plug> plugs = new ArrayList();
+    private ArrayList<Alarm> alarms = new ArrayList();
+    private CircularProgressView progress;
     private JsonObjectRequest powerReq = null;
     private JsonObjectRequest addAlarmReq = null;
     private JsonObjectRequest cancelAlarmReq = null;
@@ -73,7 +79,11 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private Spinner spinnerPlug;
     private Switch switchPower;
     private LinearLayout llAdd;
-    private CustomTextView txtAdd;
+    private TextView txtAdd;
+    private String NOT_SELECTED_PLUG = "-----";
+
+    private RelativeLayout rlNotAvailable;
+    private ImageView imgSync;
 
     private Alarm newAlarm;
 
@@ -101,21 +111,29 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private void init() {
         lvPlugs = (ListView) rootView.findViewById(R.id.lvPlugs);
         lvAlarms = (ListView) rootView.findViewById(R.id.lvAlarms);
+        blackLine = rootView.findViewById(R.id.blackLine);
+        greenLine = rootView.findViewById(R.id.blackLine);
         rlFooter = (RelativeLayout) rootView.findViewById(R.id.rlFooter);
         llAddSchedule = (LinearLayout) rootView.findViewById(R.id.llAddSchedule);
-        txtAddSchedule = (CustomTextView) rootView.findViewById(R.id.txtAddSchedule);
+        txtAddSchedule = (TextView) rootView.findViewById(R.id.txtAddSchedule);
+        progress = (CircularProgressView) rootView.findViewById(R.id.progress);
         // add page
         rlAdd = (RelativeLayout) rootView.findViewById(R.id.rlAdd);
         timePicker = (TimePicker) rootView.findViewById(R.id.timePicker);
         spinnerPlug = (Spinner) rootView.findViewById(R.id.spinnerPlug);
         switchPower = (Switch) rootView.findViewById(R.id.switchPower);
         llAdd = (LinearLayout) rootView.findViewById(R.id.llAdd);
-        txtAdd = (CustomTextView) rootView.findViewById(R.id.txtAdd);
+        txtAdd = (TextView) rootView.findViewById(R.id.txtAdd);
+        // not available page
+        rlNotAvailable = (RelativeLayout) rootView.findViewById(R.id.rlNotAvailable);
+        imgSync = (ImageView) rootView.findViewById(R.id.imgSync);
 
         timePicker.setIs24HourView(true);
 
+        // set listeners
         llAddSchedule.setOnClickListener(this);
         llAdd.setOnClickListener(this);
+        imgSync.setOnClickListener(this);
 
         switchPower.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -126,6 +144,15 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                     switchPower.setText(getString(R.string.xml_off));
             }
         });
+        // end
+
+        List<String> list = new ArrayList<String>();
+        list.add(NOT_SELECTED_PLUG);
+        for (int i = 0; i < plugs.size(); i++)
+            list.add(plugs.get(i).getPlugName());
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPlug.setAdapter(dataAdapter);
 
         syncRequest();
     }
@@ -140,28 +167,32 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         }
         else if (v == llAdd) {
             if (alarms.size() != 20) {
-                int intervalTime = TimeUtility.getDiffTimeForSetAlarm(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
-                TimeUtility.showRemainingTime();
-                Calendar cal = Calendar.getInstance();
-
                 // create alarm
-                newAlarm = new Alarm();
-                newAlarm.setAlarmId(0);
-                newAlarm.setAlarmName("Alarm-Name");
-                newAlarm.setWhenSetTime(cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
-                newAlarm.setExecuteTime(timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute());
-                newAlarm.setPlugNum(plugs.get(spinnerPlug.getSelectedItemPosition()).getPlugNum());
-                if (switchPower.isChecked())
-                    newAlarm.setAlarmStatus(AlarmStatus.ON);
-                else
-                    newAlarm.setAlarmStatus(AlarmStatus.OFF);
-                // end
+                if (spinnerPlug.getSelectedItemPosition() != 0) {
+                    int intervalTime = TimeUtility.getDiffTimeForSetAlarm(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                    Calendar cal = Calendar.getInstance();
 
-                Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
-                rlAdd.startAnimation(upBottom);
-                rlAdd.setVisibility(View.GONE);
+                    newAlarm = new Alarm();
+                    newAlarm.setAlarmId(0);
+                    newAlarm.setAlarmName("Alarm-Name");
+                    newAlarm.setWhenSetTime(cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE));
+                    newAlarm.setExecuteTime(timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute());
+                    newAlarm.setPlugNum(plugs.get((spinnerPlug.getSelectedItemPosition() - 1)).getPlugNum());
+                    if (switchPower.isChecked())
+                        newAlarm.setAlarmStatus(AlarmStatus.ON);
+                    else
+                        newAlarm.setAlarmStatus(AlarmStatus.OFF);
+                    // end
 
-                addAlarmRequest(intervalTime);
+                    Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
+                    rlAdd.startAnimation(upBottom);
+                    rlAdd.setVisibility(View.GONE);
+
+                    addAlarmRequest(intervalTime);
+                }
+                else {
+                    Toast.makeText(Utility.getContext(), getString(R.string.error_please_select_a_plug), Toast.LENGTH_SHORT).show();
+                }
             }
             else {
                 Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
@@ -171,10 +202,37 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                 Toast.makeText(Utility.getContext(), getString(R.string.error_max_alarm_added), Toast.LENGTH_LONG).show();
             }
         }
+        else if (v == imgSync) {
+            syncRequest();
+        }
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    private void showRefreshPage() {
+        rlAdd.setVisibility(View.GONE);
+        lvPlugs.setVisibility(View.GONE);
+        lvAlarms.setVisibility(View.GONE);
+        blackLine.setVisibility(View.GONE);
+        greenLine.setVisibility(View.GONE);
+        llAddSchedule.setVisibility(View.GONE);
+
+        rlNotAvailable.setVisibility(View.VISIBLE);
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    private void hideRefreshPage() {
+        rlNotAvailable.setVisibility(View.GONE);
+
+        lvPlugs.setVisibility(View.VISIBLE);
+        lvAlarms.setVisibility(View.VISIBLE);
+        blackLine.setVisibility(View.VISIBLE);
+        greenLine.setVisibility(View.VISIBLE);
+        llAddSchedule.setVisibility(View.VISIBLE);
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public void powerRequest(final int position, final int plugNum, final String plugStatus) {
+        hideRefreshPage();
         if (powerReq != null)
             powerReq.cancel();
 
@@ -212,6 +270,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                showRefreshPage();
                 VolleyLog.e("Error", "Error: " + error.networkResponse);
                 if (error.networkResponse != null)
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
@@ -224,6 +283,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public void addAlarmRequest(int intervalTime) {
+        hideRefreshPage();
         if (addAlarmReq != null)
             addAlarmReq.cancel();
 
@@ -249,6 +309,8 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                 Gson gson = new Gson();
                 GeneralResponse generalResponse = gson.fromJson(jsonString, GeneralResponse.class);
                 if (generalResponse.isOk()) {
+                    TimeUtility.showRemainingTime();
+
                     Handler handler=new Handler();
                     Runnable runnable = new Runnable() {
                         public void run() {
@@ -261,6 +323,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                showRefreshPage();
                 VolleyLog.e("Error", "Error: " + error.networkResponse);
                 if (error.networkResponse != null)
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
@@ -273,6 +336,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public void cancelAlarmRequest(final int position) {
+        hideRefreshPage();
         if (cancelAlarmReq != null)
             cancelAlarmReq.cancel();
 
@@ -304,6 +368,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                showRefreshPage();
                 VolleyLog.e("Error", "Error: " + error.networkResponse);
                 if (error.networkResponse != null)
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
@@ -316,6 +381,9 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     public void syncRequest() {
+        hideRefreshPage();
+        progress.startAnimation();
+        progress.setVisibility(View.VISIBLE);
         if (syncReq != null)
             syncReq.cancel();
 
@@ -336,6 +404,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         syncReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                hideRefreshPage();
                 String jsonString = response.toString();
                 Log.i("What", jsonString);
                 Gson gson = new Gson();
@@ -370,29 +439,37 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                         lvPlugs.setAdapter(plugAdapter);
 
 
-                        Collections.sort(alarms, new Comparator() {
-                            @Override
-                            public int compare(Object o1, Object o2) {
-                                Alarm p1 = (Alarm) o1;
-                                Alarm p2 = (Alarm) o2;
-                                return p1.getExecuteTime().compareToIgnoreCase(p2.getExecuteTime());
-                            }
-                        });
+//                        Collections.sort(alarms, new Comparator() {
+//                            @Override
+//                            public int compare(Object o1, Object o2) {
+//                                Alarm p1 = (Alarm) o1;
+//                                Alarm p2 = (Alarm) o2;
+//                                return p1.getExecuteTime().compareToIgnoreCase(p2.getExecuteTime());
+//                            }
+//                        });
+                        Collections.reverse(alarms);
                         alarmAdapter = new AdapterAlarms(Utility.getContext(), FragmentControlPlugs.this, alarms);
                         lvAlarms.setAdapter(alarmAdapter);
 
                         List<String> list = new ArrayList<String>();
+                        list.add(NOT_SELECTED_PLUG);
                         for (int i = 0; i < plugs.size(); i++)
                             list.add(plugs.get(i).getPlugName());
                         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, list);
                         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinnerPlug.setAdapter(dataAdapter);
+
+                        progress.stopAnimation();
+                        progress.setVisibility(View.GONE);
                     }
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progress.stopAnimation();
+                progress.setVisibility(View.GONE);
+                showRefreshPage();
                 VolleyLog.e("Error", "Error: " + error.networkResponse);
                 if (error.networkResponse != null)
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
@@ -413,24 +490,6 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        syncRequest();
-
-        // pooling sync
-//        poolingRunnable = new Runnable() {
-//            public void run() {
-//                syncRequest();
-//                poolingHandler.postDelayed(poolingRunnable, POOLING_DELAY);
-//            }
-//        };
-//        poolingHandler.postDelayed(poolingRunnable, POOLING_DELAY);
-        // end
-    }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     @Override
     public void onStop() {
         super.onStop();
@@ -446,5 +505,33 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         // cancel pooling
 //        poolingHandler.removeCallbacks(poolingRunnable);
         // end
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncRequest();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK){
+                    if (rlAdd.getVisibility() == View.VISIBLE) {
+                        Animation upBottom = AnimationUtils.loadAnimation(getContext(), R.anim.bottom_down);
+                        rlAdd.startAnimation(upBottom);
+                        rlAdd.setVisibility(View.GONE);
+                    }
+                    else {
+                        getActivity().finish();
+                    }
+                    return true;
+                }
+
+                return false;
+            }
+        });
     }
 }

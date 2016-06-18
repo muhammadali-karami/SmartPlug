@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.muhammadalikarami.smartplug"
-        minSdkVersion 10
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile project(':lib-volley')
     compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
 }

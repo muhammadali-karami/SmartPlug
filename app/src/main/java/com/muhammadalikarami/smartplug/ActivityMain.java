@@ -73,4 +73,8 @@ public class ActivityMain extends AppCompatActivity {
 //            smartPlugReq.cancel();
 //    }
 
+    @Override
+    public void onBackPressed() {
+
+    }
 }

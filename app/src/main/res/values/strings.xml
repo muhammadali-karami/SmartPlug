@@ -19,9 +19,10 @@
     <string name="time_utility_and">and</string>
     <string name="time_utility_remaining">from now.</string>
 
-    <string name="dialog_delete_content">Delete? Are you sure?</string>
+    <string name="dialog_delete_content">Delete, Are you sure?</string>
     <string name="dialog_delete_yes">YES</string>
     <string name="dialog_delete_cancel">CANCEL</string>
 
+    <string name="error_please_select_a_plug">Please select a Plug.</string>
     <string name="error_max_alarm_added">You can\'t add more alarm.</string>
 </resources>

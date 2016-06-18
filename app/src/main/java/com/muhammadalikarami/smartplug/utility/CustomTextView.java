@@ -20,9 +20,9 @@ public class CustomTextView extends TextView{
 
 		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomTextView);
 
-		int fontType = a.getInt(R.styleable.CustomTextView_fonts , 3);
-		//do something with str
-		setFont(context, Utility.fontsMap.get(fontType + ""));
+//		int fontType = a.getInt(R.styleable.CustomTextView_fonts , 3);
+//		//do something with str
+//		setFont(context, Utility.fontsMap.get(fontType + ""));
 
 		a.recycle();
 	}
@@ -32,9 +32,9 @@ public class CustomTextView extends TextView{
 
 		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomTextView, defStyle, 0);
 
-		int fontType = a.getInt(R.styleable.CustomTextView_fonts, 3);
-		//do something with str
-		setFont(context, Utility.fontsMap.get(fontType + ""));
+//		int fontType = a.getInt(R.styleable.CustomTextView_fonts, 3);
+//		//do something with str
+//		setFont(context, Utility.fontsMap.get(fontType + ""));
 
 		a.recycle();
 	}
