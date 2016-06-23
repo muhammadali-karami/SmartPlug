@@ -13,7 +13,7 @@ boolean schFlag = false;
 WiFiClient client;
 
 #define PLUG_SIZE 2
-#define ALARM_SIZE 20
+#define ALARM_SIZE 15
 int plugNum[PLUG_SIZE];
 String plugName[PLUG_SIZE];
 String plugStatus[PLUG_SIZE];
@@ -31,16 +31,20 @@ int secondSpaceIndex = 0;
 String strOrder;
 String response;
 
+/* ERROR CODES
+ *  1001 : Max alarm added
+*/
+
 WiFiServer server(80);
 
-void setup() 
+void setup()
 {
   initHardware();
   setupWiFi();
   server.begin();
 }
 
-void loop() 
+void loop()
 {
   Alarm.delay(0);
 
@@ -57,7 +61,7 @@ void loop()
   // Read the first line of the request
   req = client.readStringUntil('\r');
   client.flush();
-  
+
   firstSpaceIndex = req.indexOf(' ');
   secondSpaceIndex = req.indexOf(' ', firstSpaceIndex + 1);
   // (GET ) ( HTTP/1.1) removed from request - complete sentense is (GET X HTTP/1.1)
@@ -66,7 +70,7 @@ void loop()
 
       // * * * * * * * * * *
       // SYNC
-      if (strOrder.indexOf("/sync") != -1) { 
+      if (strOrder.indexOf("/sync") != -1) {
          sync();
       }
       // * * * * * * * * * *
@@ -74,7 +78,7 @@ void loop()
       else if(strOrder.indexOf("/cancel/") != -1) {
         String strReceivedd = String(strOrder.substring(strOrder.lastIndexOf("/") + 1, strOrder.length()));
         long alarmId = atol(strReceivedd.c_str());
-        
+
         cancelAlarm(alarmId);
       }
       // * * * * * * * * * *
@@ -82,11 +86,11 @@ void loop()
       else if(strOrder.indexOf("/simple/") != -1) {
           if(strOrder.indexOf("/1/") != -1) {
               if (strOrder.indexOf("/on") != -1) {
-                turnOn(1);               
+                turnOn(1);
               }
               else if(strOrder.indexOf("/off") != -1) {
                 turnOff(1);
-              }   
+              }
           }
           else if(strOrder.indexOf("/2/") != -1) {
               if (strOrder.indexOf("/on") != -1) {
@@ -94,7 +98,7 @@ void loop()
               }
               else if(strOrder.indexOf("/off") != -1) {
                 turnOff(2);
-              }   
+              }
           }
 
           response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
@@ -108,9 +112,9 @@ void loop()
             if(isAlarmSetArray[i])
               numberOfAlarmThatSet++;
         }
-        // max of alarm is 20
-        if(numberOfAlarmThatSet <= 20) {
-          
+        // max of alarm is 15
+        if(numberOfAlarmThatSet < 15) {
+
             if(strOrder.indexOf("/1/") != -1) {
                 if (strOrder.indexOf("/on/") != -1) {
                   String strReceived = String(strOrder.substring(strOrder.lastIndexOf("/") + 1, strOrder.length()));
@@ -118,16 +122,16 @@ void loop()
                   int firstSign = strReceived.indexOf('&');
                   int secondSign = strReceived.indexOf('&', firstSign + 1);
                   int thirdSign = strReceived.indexOf('&', secondSign + 1);
-  
+
                   // alarm info from receive string
                   String strAlarmName = String(strReceived.substring(0, firstSign));
                   String strWhenSetTime = String(strReceived.substring(firstSign + 1, secondSign));
                   String strExecuteTime = String(strReceived.substring(secondSign + 1, thirdSign));
                   String strIntervalTime = String(strReceived.substring(thirdSign + 1, strOrder.length()));
-  
+
                   // convert received interval time to long
                   long intervalTime = atol(strIntervalTime.c_str());
-  
+
                   int alarmId = Alarm.timerOnce(intervalTime, turnOnPlug1Schedule);
                   isAlarmSetArray[alarmId] = true;
                   plugNumArray[alarmId] = 1;
@@ -142,16 +146,16 @@ void loop()
                   int firstSign = strReceived.indexOf('&');
                   int secondSign = strReceived.indexOf('&', firstSign + 1);
                   int thirdSign = strReceived.indexOf('&', secondSign + 1);
-  
+
                   // alarm info from receive string
                   String strAlarmName = String(strReceived.substring(0, firstSign));
                   String strWhenSetTime = String(strReceived.substring(firstSign + 1, secondSign));
                   String strExecuteTime = String(strReceived.substring(secondSign + 1, thirdSign));
                   String strIntervalTime = String(strReceived.substring(thirdSign + 1, strOrder.length()));
-  
+
                   // convert received interval time to long
                   long intervalTime = atol(strIntervalTime.c_str());
-  
+
                   int alarmId = Alarm.timerOnce(intervalTime, turnOffPlug1Schedule);
                   isAlarmSetArray[alarmId] = true;
                   plugNumArray[alarmId] = 1;
@@ -159,7 +163,7 @@ void loop()
                   whenSetTimeArray[alarmId] = strWhenSetTime;
                   executeTimeArray[alarmId] = strExecuteTime;
                   alarmStatusArray[alarmId] = "off";
-                }   
+                }
             }
             else if(strOrder.indexOf("/2/") != -1) {
                 if (strOrder.indexOf("/on/") != -1) {
@@ -168,16 +172,16 @@ void loop()
                   int firstSign = strReceived.indexOf('&');
                   int secondSign = strReceived.indexOf('&', firstSign + 1);
                   int thirdSign = strReceived.indexOf('&', secondSign + 1);
-  
+
                   // alarm info from receive string
                   String strAlarmName = String(strReceived.substring(0, firstSign));
                   String strWhenSetTime = String(strReceived.substring(firstSign + 1, secondSign));
                   String strExecuteTime = String(strReceived.substring(secondSign + 1, thirdSign));
                   String strIntervalTime = String(strReceived.substring(thirdSign + 1, strOrder.length()));
-  
+
                   // convert received interval time to long
                   long intervalTime = atol(strIntervalTime.c_str());
-  
+
                   int alarmId = Alarm.timerOnce(intervalTime, turnOnPlug2Schedule);
                   isAlarmSetArray[alarmId] = true;
                   plugNumArray[alarmId] = 2;
@@ -192,16 +196,16 @@ void loop()
                   int firstSign = strReceived.indexOf('&');
                   int secondSign = strReceived.indexOf('&', firstSign + 1);
                   int thirdSign = strReceived.indexOf('&', secondSign + 1);
-  
+
                   // alarm info from receive string
                   String strAlarmName = String(strReceived.substring(0, firstSign));
                   String strWhenSetTime = String(strReceived.substring(firstSign + 1, secondSign));
                   String strExecuteTime = String(strReceived.substring(secondSign + 1, thirdSign));
                   String strIntervalTime = String(strReceived.substring(thirdSign + 1, strOrder.length()));
-  
+
                   // convert received interval time to int
                   long intervalTime = atol(strIntervalTime.c_str());
-  
+
                   int alarmId = Alarm.timerOnce(intervalTime, turnOffPlug2Schedule);
                   isAlarmSetArray[alarmId] = true;
                   plugNumArray[alarmId] = 2;
@@ -209,15 +213,15 @@ void loop()
                   whenSetTimeArray[alarmId] = strWhenSetTime;
                   executeTimeArray[alarmId] = strExecuteTime;
                   alarmStatusArray[alarmId] = "off";
-                }   
-            }     
+                }
+            }
 
             response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
             response += "{\"ok\":true,\"messages\":[""]}";
         }
         else {
-            response = "HTTP/1.1 1001 NOK\r\nContent-Type: application/json\r\n\r\n";
-            response += "{\"ok\":false,\"messages\":[""]}";          
+            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+            response += "{\"ok\":false,\"messages\":[\"1001\"]}";
         }
       }
 
