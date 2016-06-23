@@ -48,7 +48,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -86,6 +85,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
     private ImageView imgSync;
 
     private Alarm newAlarm;
+    private int MAX_ALARM = 15;
 
     private Runnable poolingRunnable;
     private Handler poolingHandler = new Handler();
@@ -166,7 +166,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             rlAdd.setVisibility(View.VISIBLE);
         }
         else if (v == llAdd) {
-            if (alarms.size() != 20) {
+            if (alarms.size() < MAX_ALARM) {
                 // create alarm
                 if (spinnerPlug.getSelectedItemPosition() != 0) {
                     int intervalTime = TimeUtility.getDiffTimeForSetAlarm(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
@@ -301,7 +301,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         String url = Statics.scheduleUrl + "/" + newAlarm.getPlugNum() + "/" + newAlarm.getAlarmStatus() + "/" + newAlarm.getAlarmName() + "&" + newAlarm.getWhenSetTime()
                     + "&" + newAlarm.getExecuteTime() + "&" + intervalTime;
-        Log.i("Status", url);
+        Log.i(Statics.TAG, url);
         addAlarmReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -319,14 +319,26 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                     };
                     handler.postDelayed(runnable, 500);
                 }
+                else {
+                    for (int i = 0; i < generalResponse.getMessages().length; i++) {
+                        switch (generalResponse.getMessages()[i]) {
+                            case Statics.ERROR_MAX_ALARM_ADDED:
+                                Log.i(Statics.TAG, getString(R.string.error_max_alarm_added));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 showRefreshPage();
                 VolleyLog.e("Error", "Error: " + error.networkResponse);
-                if (error.networkResponse != null)
+                if (error.networkResponse != null) {
                     VolleyLog.e("Error", "Error: " + error.networkResponse.statusCode);
+                }
             }
         });
         addAlarmReq.setRetryPolicy(new DefaultRetryPolicy(Statics.DEFAULT_TIMEOUT_MS, Statics.DEFAULT_MAX_RETRIES, Statics.DEFAULT_BACKOFF_MULT));
@@ -406,7 +418,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             public void onResponse(JSONObject response) {
                 hideRefreshPage();
                 String jsonString = response.toString();
-                Log.i("What", jsonString);
+                Log.i(Statics.TAG, jsonString);
                 Gson gson = new Gson();
                 SyncResponse syncResponse = gson.fromJson(jsonString, SyncResponse.class);
                 if (syncResponse.isOk()) {
