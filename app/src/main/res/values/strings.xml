@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartPlug</string>
+    <string name="app_name">Smart Plug</string>
 
     <string name="xml_devices">Devices</string>
     <string name="xml_add_schedule">Add Schedule</string>

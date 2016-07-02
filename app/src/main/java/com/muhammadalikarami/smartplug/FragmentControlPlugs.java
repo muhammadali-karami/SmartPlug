@@ -301,7 +301,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         String url = Statics.scheduleUrl + "/" + newAlarm.getPlugNum() + "/" + newAlarm.getAlarmStatus() + "/" + newAlarm.getAlarmName() + "&" + newAlarm.getWhenSetTime()
                     + "&" + newAlarm.getExecuteTime() + "&" + intervalTime;
-        Log.i(Statics.TAG, url);
+//        Log.i(Statics.TAG, url);
         addAlarmReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -323,7 +323,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
                     for (int i = 0; i < generalResponse.getMessages().length; i++) {
                         switch (generalResponse.getMessages()[i]) {
                             case Statics.ERROR_MAX_ALARM_ADDED:
-                                Log.i(Statics.TAG, getString(R.string.error_max_alarm_added));
+//                                Log.i(Statics.TAG, getString(R.string.error_max_alarm_added));
                                 break;
                             default:
                                 break;
@@ -365,7 +365,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
 
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         String url = Statics.cancelUrl + "/" + alarms.get(position).getAlarmId();
-        Log.i("Status", url);
+//        Log.i("Status", url);
         cancelAlarmReq = new JsonObjectRequest(Request.Method.GET, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -418,7 +418,7 @@ public class FragmentControlPlugs extends Fragment implements View.OnClickListen
             public void onResponse(JSONObject response) {
                 hideRefreshPage();
                 String jsonString = response.toString();
-                Log.i(Statics.TAG, jsonString);
+//                Log.i(Statics.TAG, jsonString);
                 Gson gson = new Gson();
                 SyncResponse syncResponse = gson.fromJson(jsonString, SyncResponse.class);
                 if (syncResponse.isOk()) {

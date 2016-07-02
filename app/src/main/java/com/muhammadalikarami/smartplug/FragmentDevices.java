@@ -52,8 +52,8 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
 
         // get objects
         lv = (ListView) rootView.findViewById(R.id.lv);
-        rlDevices = (RelativeLayout) rootView.findViewById(R.id.rlDevices);
-        rlAddSchedule = (RelativeLayout) rootView.findViewById(R.id.rlAddSchedule);
+//        rlDevices = (RelativeLayout) rootView.findViewById(R.id.rlDevices);
+//        rlAddSchedule = (RelativeLayout) rootView.findViewById(R.id.rlAddSchedule);
 
         // set listeners
         rlDevices.setOnClickListener(this);
@@ -128,13 +128,13 @@ public class FragmentDevices extends Fragment implements View.OnClickListener {
                 String jsonString = response.toString();
 //                    Gson gson = new Gson();
 //                    Toast.makeText(ActivityMain.this, jsonString, Toast.LENGTH_SHORT).show();
-                Log.i("INJA", "OK");
+//                Log.i("INJA", "OK");
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.i("INJA", "NOK");
+//                Log.i("INJA", "NOK");
 //                    new ShowServerErrorDialog(getActivity(), error.networkResponse);
 
                 VolleyLog.e("Error", "Error: " + error.getMessage());

@@ -5,9 +5,9 @@
 #include <EEPROM.h>
 
 const String AP_PRE_NAME = "Smart Plug - ";
-const char AP_Password[] = "";
-const int PLUG_1 = 13;
-const int PLUG_2 = 15;
+const char AP_Password[] = "amirkarimi";
+const int PLUG_1 = 0;
+const int PLUG_2 = 2;
 long schTime = 0;
 boolean schFlag = false;
 WiFiClient client;
@@ -272,13 +272,13 @@ void turnOnPlug1Schedule(){
   digitalWrite(PLUG_1, HIGH);
   plugStatus[0] = "on";
   // unset this alarm from alarms info
-  int alarmId = Alarm.getTriggeredAlarmId();  
+  int alarmId = Alarm.getTriggeredAlarmId();
   isAlarmSetArray[alarmId] = false;
   plugNumArray[alarmId] = 1;
   alarmNameArray[alarmId] = "";
   whenSetTimeArray[alarmId] = "";
   executeTimeArray[alarmId] = "";
-  alarmStatusArray[alarmId] = ""; 
+  alarmStatusArray[alarmId] = "";
 
   response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
   response += "{\"ok\":true,\"messages\":[""]}";
@@ -287,13 +287,13 @@ void turnOnPlug1Schedule(){
 }
 
 // * * * * * * * * * * * * * * * * * * * *
-// Turn off Plug 1 (schedule) 
+// Turn off Plug 1 (schedule)
 // * * * * * * * * * * * * * * * * * * * *
 void turnOffPlug1Schedule(){
   digitalWrite(PLUG_1, LOW);
   plugStatus[0] = "off";
   // unset this alarm from alarms info
-  int alarmId = Alarm.getTriggeredAlarmId();  
+  int alarmId = Alarm.getTriggeredAlarmId();
   isAlarmSetArray[alarmId] = false;
   plugNumArray[alarmId] = 1;
   alarmNameArray[alarmId] = "";
@@ -314,13 +314,13 @@ void turnOnPlug2Schedule(){
   digitalWrite(PLUG_2, HIGH);
   plugStatus[1] = "on";
   // unset this alarm from alarms info
-  int alarmId = Alarm.getTriggeredAlarmId();  
+  int alarmId = Alarm.getTriggeredAlarmId();
   isAlarmSetArray[alarmId] = false;
   plugNumArray[alarmId] = 2;
   alarmNameArray[alarmId] = "";
   whenSetTimeArray[alarmId] = "";
   executeTimeArray[alarmId] = "";
-  alarmStatusArray[alarmId] = ""; 
+  alarmStatusArray[alarmId] = "";
 
   response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
   response += "{\"ok\":true,\"messages\":[""]}";
@@ -329,13 +329,13 @@ void turnOnPlug2Schedule(){
 }
 
 // * * * * * * * * * * * * * * * * * * * *
-// Turn off Plug 2 (schedule) 
+// Turn off Plug 2 (schedule)
 // * * * * * * * * * * * * * * * * * * * *
 void turnOffPlug2Schedule(){
   digitalWrite(PLUG_2, LOW);
   plugStatus[1] = "off";
   // unset this alarm from alarms info
-  int alarmId = Alarm.getTriggeredAlarmId();  
+  int alarmId = Alarm.getTriggeredAlarmId();
   isAlarmSetArray[alarmId] = false;
   plugNumArray[alarmId] = 2;
   alarmNameArray[alarmId] = "";
@@ -375,12 +375,12 @@ void sync(){
   response += "{\"ok\":true,\"messages\":[""],\"data\":{\"plugs\":[";
     for(int i = 0; i < PLUG_SIZE; i++) {
       String str = "";
-      str += "{\"plugNum\":"; 
-      str += plugNum[i]; 
-      str += ",\"plugName\":\""; 
+      str += "{\"plugNum\":";
+      str += plugNum[i];
+      str += ",\"plugName\":\"";
       str += plugName[i];
-      str += "\",\"plugStatus\":\""; 
-      str += plugStatus[i]; 
+      str += "\",\"plugStatus\":\"";
+      str += plugStatus[i];
       str += "\"}";
       if (i != 1) {
         response += str;
@@ -399,18 +399,18 @@ void sync(){
   for(int i = 0; i < ALARM_SIZE; i++) {
       if(isAlarmSetArray[i]) {
         String str = "";
-        str += "{\"alarmId\":"; 
-        str += i; 
-        str += ",\"plugNum\":"; 
+        str += "{\"alarmId\":";
+        str += i;
+        str += ",\"plugNum\":";
         str += plugNumArray[i];
-        str += ",\"alarmName\":\""; 
-        str += alarmNameArray[i]; 
-        str += "\",\"whenSetTime\":\""; 
-        str += whenSetTimeArray[i]; 
-        str += "\",\"executeTime\":\""; 
-        str += executeTimeArray[i]; 
-        str += "\",\"alarmStatus\":\""; 
-        str += alarmStatusArray[i]; 
+        str += ",\"alarmName\":\"";
+        str += alarmNameArray[i];
+        str += "\",\"whenSetTime\":\"";
+        str += whenSetTimeArray[i];
+        str += "\",\"executeTime\":\"";
+        str += executeTimeArray[i];
+        str += "\",\"alarmStatus\":\"";
+        str += alarmStatusArray[i];
         str += "\"}";
         if (lastAlarmIdThatSet != -1 && i != lastAlarmIdThatSet) {
           response += str;
@@ -418,7 +418,7 @@ void sync(){
         }
         else {
           response += str;
-        }     
+        }
       }
   }
   response += "]}}";
@@ -457,7 +457,7 @@ void customSetupWiFi(String ssid, String password) {
     NEW_Name[i] = ssid.charAt(i);
   for (int i=0; i<password.length(); i++)
     NEW_Password[i] = password.charAt(i);
-    
+
   WiFi.softAP(NEW_Name, NEW_Password);
   IPAddress local_ip = IPAddress(192, 168, 0, 1);
   IPAddress gateway_ip = IPAddress(192, 168, 0, 1);
@@ -470,7 +470,6 @@ void customSetupWiFi(String ssid, String password) {
 // * * * * * * * * * * * * * * * * * * * *
 void setupWiFi() {
   WiFi.mode(WIFI_AP);
-
   // * * * * * * * * * *
   // create AP name
       uint8_t mac[WL_MAC_ADDR_LENGTH];
@@ -479,18 +478,21 @@ void setupWiFi() {
                      String(mac[WL_MAC_ADDR_LENGTH - 1], HEX);
       macID.toUpperCase();
       String AP_Name = AP_PRE_NAME + macID;
-    
+
       char AP_NameChar[AP_Name.length() + 1];
       memset(AP_NameChar, 0, AP_Name.length() + 1);
-    
+
       for (int i=0; i<AP_Name.length(); i++)
           AP_NameChar[i] = AP_Name.charAt(i);
   // * * * * * * * * * *
-
   WiFi.softAP(AP_NameChar, AP_Password);
-  
+
   IPAddress local_ip = IPAddress(192, 168, 0, 1);
   IPAddress gateway_ip = IPAddress(192, 168, 0, 1);
   IPAddress subnet_ip = IPAddress(255, 255, 255, 0);
   WiFi.softAPConfig(local_ip, gateway_ip, subnet_ip);
+//  while (WiFi.status() != WL_CONNECTED) {
+    delay(10000);
+//    Serial.print(".");
+//  }
 }
